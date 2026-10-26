@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crop Disease Detection System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* FLOATING BACKGROUND IMAGE */
+        .bg-image {
+            position: fixed;
+            top: -10%;
+            left: -10%;
+            width: 120%;
+            height: 120%;
+            background-image: url('/static/background.jpg');
+            background-size: cover;
+            background-position: center;
+            z-index: -1;
+            animation: floatBg 8s ease-in-out infinite;
+            filter: brightness(0.45);
+        }
+
+        @keyframes floatBg {
+            0%   { transform: scale(1)    translateY(0px); }
+            50%  { transform: scale(1.05) translateY(-20px); }
+            100% { transform: scale(1)    translateY(0px); }
+        }
+
+        /* HEADER */
+        header {
+            background: rgba(0, 60, 0, 0.75);
+            color: white;
+            padding: 15px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            backdrop-filter: blur(4px);
+        }
+
+        header h1 {
+            font-size: 20px;
+        }
+
+        header p {
+            font-size: 13px;
+            opacity: 0.85;
+        }
+
+        /* HERO SECTION - TWO COLUMNS */
+        .hero {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 60px 60px;
+            min-height: calc(100vh - 70px);
+            gap: 40px;
+        }
+
+        /* LEFT SIDE */
+        .hero-left {
+            flex: 1;
+            color: white;
+        }
+
+        .hero-left .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .hero-left h2 {
+            font-size: 42px;
+            font-weight: bold;
+            line-height: 1.2;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+        }
+
+        .hero-left p {
+            font-size: 16px;
+            opacity: 0.9;
+            margin-bottom: 30px;
+            line-height: 1.7;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+        }
+
+        .stats {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .stat-badge {
+            background: rgba(0,0,0,0.4);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            border: 1px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(4px);
+        }
+
+        /* RIGHT SIDE */
+        .hero-right {
+            flex: 1;
+            max-width: 460px;
+        }
+
+        .upload-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 35px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            backdrop-filter: blur(10px);
+        }
+
+        .upload-card h2 {
+            color: #2e7d32;
+            margin-bottom: 8px;
+            font-size: 20px;
+        }
+
+        .upload-card > p {
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 13px;
+        }
+
+        .upload-area {
+            border: 2px dashed #2e7d32;
+            border-radius: 10px;
+            padding: 30px 20px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .upload-area:hover {
+            background-color: #f1f8f1;
+        }
+
+        .upload-area img#preview {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 8px;
+            display: none;
+            margin: 0 auto;
+        }
+
+        .upload-icon {
+            font-size: 40px;
+            margin-bottom: 8px;
+        }
+
+        .upload-area p {
+            color: #888;
+            font-size: 13px;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .btn-analyze {
+            background-color: #2e7d32;
+            color: white;
+            border: none;
+            padding: 13px 40px;
+            font-size: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.3s;
+        }
+
+        .btn-analyze:hover {
+            background-color: #1b5e20;
+        }
+
+        .btn-analyze:disabled {
+            background-color: #aaa;
+            cursor: not-allowed;
+        }
+
+        .result-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            display: none;
+            margin-top: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .result-card h2 {
+            color: #2e7d32;
+            margin-bottom: 15px;
+            font-size: 18px;
+            text-align: center;
+        }
+
+        .result-item {
+            background: #f9f9f9;
+            border-left: 4px solid #2e7d32;
+            padding: 12px 15px;
+            margin-bottom: 12px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .result-item h3 {
+            color: #333;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .result-item p {
+            color: #555;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .confidence-bar {
+            background: #e0e0e0;
+            border-radius: 10px;
+            height: 8px;
+            margin-top: 6px;
+            overflow: hidden;
+        }
+
+        .confidence-fill {
+            background: #2e7d32;
+            height: 100%;
+            border-radius: 10px;
+            transition: width 1s ease;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            display: none;
+            background: rgba(255,255,255,0.95);
+            border-radius: 16px;
+            margin-top: 20px;
+        }
+
+        .loading p {
+            color: #2e7d32;
+            font-size: 15px;
+            margin-top: 10px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #2e7d32;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0%   { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .healthy  { border-left-color: #2e7d32; }
+        .diseased { border-left-color: #c62828; }
+
+        footer {
+            text-align: center;
+            padding: 15px;
+            color: white;
+            font-size: 12px;
+            background: rgba(0, 60, 0, 0.75);
+            backdrop-filter: blur(4px);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- FLOATING BACKGROUND IMAGE -->
+    <div class="bg-image"></div>
+
+    <!-- HEADER -->
+    <header>
+        <h1> Crop Disease Detection System</h1>
+        <p>ABU Zaria | Department of Computer Science</p>
+    </header>
+
+    <!-- HERO SECTION -->
+    <div class="hero">
+
+        <!-- LEFT SIDE -->
+        <div class="hero-left">
+            <div class="badge">🎓 Final Year Project — ABU Zaria</div>
+            <h2>AI-Powered Crop Disease Detection for Nigerian Farmers</h2>
+            <p>Upload a photo of your crop leaf and get instant disease diagnosis and treatment recommendations powered by Deep Learning technology.</p>
+            <div class="stats">
+                <div class="stat-badge">✅ 94% Accuracy</div>
+                <div class="stat-badge">⚡ Instant Results</div>
+                <div class="stat-badge">🌾 38 Disease Classes</div>
+                <div class="stat-badge">🇳🇬 Built for Nigeria</div>
+            </div>
+        </div>
+
+        <!-- RIGHT SIDE -->
+        <div class="hero-right">
+            <div class="upload-card">
+                <h2>Scan Your Crop</h2>
+                <p>Upload a clear photo of your crop leaf for instant diagnosis</p>
+
+                <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                    <div id="uploadPrompt">
+                        <div class="upload-icon">📷</div>
+                        <p>Click here to select an image</p>
+                        <p style="font-size:11px; margin-top:4px;">Supports JPG, PNG, JPEG</p>
+                    </div>
+                    <img id="preview" src="" alt="Preview"/>
+                </div>
+
+                <input type="file" id="fileInput" accept="image/*" onchange="previewImage(event)"/>
+                <button class="btn-analyze" id="analyzeBtn" onclick="analyzeImage()" disabled>
+                    🔍 Analyze Crop
+                </button>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Analyzing your crop leaf...</p>
+            </div>
+
+            <div class="result-card" id="resultCard">
+                <h2>🔬 Diagnosis Result</h2>
+
+                <div class="result-item" id="diseaseItem">
+                    <h3>Detected Disease / Condition</h3>
+                    <p id="diseaseName">-</p>
+                </div>
+
+                <div class="result-item">
+                    <h3>Confidence Level</h3>
+                    <p id="confidenceText">-</p>
+                    <div class="confidence-bar">
+                        <div class="confidence-fill" id="confidenceFill" style="width:0%"></div>
+                    </div>
+                </div>
+
+                <div class="result-item">
+                    <h3>Recommended Treatment</h3>
+                    <p id="treatmentText">-</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <footer>
+        <p>Crop Disease Detection System &copy; 2026 | Abdulrahman Ismail | U23DLCS10236 | Supervised by Dr. Sahabi Ali Yusuf</p>
+    </footer>
+
+    <script>
+        function previewImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('preview');
+                    const uploadPrompt = document.getElementById('uploadPrompt');
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    uploadPrompt.style.display = 'none';
+                    document.getElementById('analyzeBtn').disabled = false;
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function analyzeImage() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('resultCard').style.display = 'none';
+            document.getElementById('analyzeBtn').disabled = true;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            fetch('/predict', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('resultCard').style.display = 'block';
+                document.getElementById('analyzeBtn').disabled = false;
+
+                const diseaseName = data.disease.replace(/___/g, ' - ').replace(/_/g, ' ');
+                document.getElementById('diseaseName').textContent = diseaseName;
+                document.getElementById('confidenceText').textContent = data.confidence;
+                document.getElementById('treatmentText').textContent = data.treatment;
+
+                const confidenceValue = parseFloat(data.confidence);
+                document.getElementById('confidenceFill').style.width = confidenceValue + '%';
+
+                const diseaseItem = document.getElementById('diseaseItem');
+                if (data.disease.includes('healthy')) {
+                    diseaseItem.classList.add('healthy');
+                    diseaseItem.classList.remove('diseased');
+                } else {
+                    diseaseItem.classList.add('diseased');
+                    diseaseItem.classList.remove('healthy');
+                }
+            })
+            .catch(error => {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('analyzeBtn').disabled = false;
+                alert('Error analyzing image. Please try again.');
+            });
+        }
+    </script>
+
+</body>
+</html>
