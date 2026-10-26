@@ -54,7 +54,7 @@ The dataset contains thousands of labeled plant leaf images used for training an
 ## How to Run the Project
 
 ### 1. Clone the repository
-git clone https://github.com/yourusername/crop_disease_detection.git
+git clone https://github.com/Ismail-option/crop_disease_detection.git
 
 ### 2. Navigate into the project folder
 
