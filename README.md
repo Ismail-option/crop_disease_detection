@@ -1,4 +1,4 @@
-# Crop Disease Detection System 🌱🤖
+# Crop Disease Detection System 🌱
 
 An AI-powered crop disease detection system built using Deep Learning and Computer Vision. The system uses a trained neural network model to classify plant diseases from leaf images and provide predictions through a web interface.
 
@@ -101,4 +101,4 @@ The trained model file is not included in this repository due to its large size.
 Abdulrahman Ismail
 
 GitHub:
-https://github.com/yourusername
+https://github.com/Ismail-option
